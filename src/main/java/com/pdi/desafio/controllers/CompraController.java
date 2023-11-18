@@ -1,6 +1,8 @@
 package com.pdi.desafio.controllers;
 
 import com.pdi.desafio.exceptions.CompraNaoAutorizadaException;
+import com.pdi.desafio.exceptions.ContaNaoEncontradaException;
+import com.pdi.desafio.exceptions.CpfNaoEncontradoException;
 import com.pdi.desafio.models.Compra;
 import com.pdi.desafio.models.DTOs.CompraRequestDTO;
 import com.pdi.desafio.services.CompraService;
@@ -23,7 +25,7 @@ public class CompraController {
     private CompraService compraService;
 
     @PostMapping("/")
-    public ResponseEntity<Compra> fazerNovaCompra(@RequestBody CompraRequestDTO compraRequest) throws CompraNaoAutorizadaException {
+    public ResponseEntity<Compra> fazerNovaCompra(@RequestBody CompraRequestDTO compraRequest) throws CompraNaoAutorizadaException, ContaNaoEncontradaException, CpfNaoEncontradoException {
         var compra = compraService.efetuarCompra(compraRequest.numeroConta(), compraRequest.valor());
         return ResponseEntity.ok(compra);
     }

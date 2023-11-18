@@ -10,13 +10,16 @@ import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ContaService {
 
     @Autowired
     private ContaRepository contaRepository;
+
+    @Autowired
+    private ClienteService clienteService;
 
     public String criarConta(Cliente cliente) {
         var novaConta = new Conta();
@@ -33,6 +36,10 @@ public class ContaService {
         return "Conta criada com sucesso!";
     }
 
+    public Conta salvarConta(Conta conta) {
+        return contaRepository.save(conta);
+    }
+
     private String generateSequentialNumeroConta() {
         Long maxNumeroConta = contaRepository.findMaxNumeroConta();
         Long nextNumeroConta = (maxNumeroConta != null) ? maxNumeroConta + 1 : 1;
@@ -40,7 +47,7 @@ public class ContaService {
         return String.format("%05d", nextNumeroConta);
     }
 
-     public List<Conta> buscarContaPorCpf(String cpf) throws CpfNaoEncontradoException {
+     public Conta buscarContaPorCpf(String cpf) throws CpfNaoEncontradoException {
         return contaRepository.findByCpfCliente(cpf)
                 .orElseThrow(() -> new CpfNaoEncontradoException(cpf));
      }
@@ -49,6 +56,18 @@ public class ContaService {
         return contaRepository.findByNumeroConta(numeroConta)
                 .orElseThrow(() -> new ContaNaoEncontradaException(numeroConta));
      }
+
+     public Double consultarSaldo(String numeroConta) throws ContaNaoEncontradaException {
+        var conta = contaRepository.findByNumeroConta(numeroConta).orElseThrow(() -> new ContaNaoEncontradaException(numeroConta));
+        return conta.getSaldo();
+     }
+
+     public Cliente bucarClientePorNumeroConta(String numeroConta) throws ContaNaoEncontradaException, CpfNaoEncontradoException {
+        Optional<Conta> conta = contaRepository.findByNumeroConta(numeroConta);
+
+        return clienteService.buscarClientePorCpf(conta.get().getCpfCliente());
+     }
+
 
     private double setLimiteConformeTipoCliente(Cliente cliente) {
         return cliente.getTipoCliente().getLimiteCreditoInicial();

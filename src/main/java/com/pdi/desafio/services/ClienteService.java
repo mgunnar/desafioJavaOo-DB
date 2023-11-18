@@ -5,7 +5,6 @@ import com.pdi.desafio.models.Cliente;
 import com.pdi.desafio.models.DTOs.ClienteRequestDTO;
 import com.pdi.desafio.models.DTOs.ContasResponseDTO;
 import com.pdi.desafio.repository.ClienteRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.List;
 public class ClienteService {
 private ClienteRepository clienteRepository;
 
-@Autowired
 private ContaService contaService;
 
 public ClienteService(ClienteRepository clienteRepository) {

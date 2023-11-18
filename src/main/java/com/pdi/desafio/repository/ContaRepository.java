@@ -11,7 +11,8 @@ public interface ContaRepository extends JpaRepository<Conta, String> {
     @Query("SELECT MAX(c.numeroConta) FROM contas c")
     Long findMaxNumeroConta();
 
-    Optional<List<Conta>> findByCpfCliente(String cpf);
+    Optional<List<Conta>> findMultiplasByCpfCliente(String cpf);
+    Optional<Conta> findByCpfCliente(String cpf);
 
     Optional<Conta> findByNumeroConta(String numeroConta);
 }
