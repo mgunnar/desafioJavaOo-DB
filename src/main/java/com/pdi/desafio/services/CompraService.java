@@ -2,8 +2,8 @@ package com.pdi.desafio.services;
 
 import com.pdi.desafio.exceptions.CompraNaoAutorizadaException;
 import com.pdi.desafio.exceptions.ContaNaoEncontradaException;
-import com.pdi.desafio.exceptions.CpfNaoEncontradoException;
 import com.pdi.desafio.models.Compra;
+import com.pdi.desafio.models.Conta;
 import com.pdi.desafio.models.enums.TipoCliente;
 import com.pdi.desafio.repository.CompraRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,47 +21,46 @@ public class CompraService {
     @Autowired
     CompraRepository compraRepository;
 
-        public Compra efetuarCompra(String numeroConta, Double valor) throws CompraNaoAutorizadaException, ContaNaoEncontradaException, CpfNaoEncontradoException {
-            var compra = new Compra();
-            compra.setNumeroConta(numeroConta);
-            compra.setValor(valor);
-            compra.setDataCriacao(Date.from(ZonedDateTime.now().toInstant()));
+    public Compra efetuarCompra(String numeroConta, Double valor) throws CompraNaoAutorizadaException, ContaNaoEncontradaException {
+        var compra = new Compra();
 
-            var cliente = contaService.bucarClientePorNumeroConta(numeroConta);
-            var conta = contaService.buscarContaPorNumeroConta(numeroConta);
+        compra.setNumeroConta(numeroConta);
+        compra.setValor(valor);
+        compra.setDataCriacao(Date.from(ZonedDateTime.now().toInstant()));
 
+        var conta = contaService.buscarContaPorNumeroConta(numeroConta);
+        var cliente = conta.getCliente();
 
-            if (conta.getSaldo() < valor) {
-                throw new CompraNaoAutorizadaException(valor);
-                } else {
+        if (conta.getSaldo() < valor) {
+            throw new CompraNaoAutorizadaException(valor);
+        } else {
 
-                verificaDescontoCompra(valor, cliente.getTipoCliente());
-                verificaAumentoDelimite(valor, cliente.getTipoCliente(), numeroConta);
+            var compraValidadaComDesconto = verificaDescontoCompra(valor, cliente.getTipoCliente());
+            verificaAumentoDelimite(valor, cliente.getTipoCliente(), conta);
 
-                conta.setSaldo(conta.getSaldo() - valor);
-                contaService.salvarConta(conta);
-                compraRepository.save(compra);
+            conta.setSaldo(conta.getSaldo() - compraValidadaComDesconto);
 
-                return compra;
-            }
-    }
+            contaService.salvarConta(conta);
+            compraRepository.save(compra);
 
-    private Double verificaDescontoCompra (Double valorCompra, TipoCliente tipoCliente){
-            var desconto = tipoCliente.getPercentualDesconto();
-            var varloMinimoParaDesconto = tipoCliente.getValorMinimoCompraParaTerDesconto();
-
-            if (valorCompra >= varloMinimoParaDesconto) {
-                return valorCompra - (valorCompra * desconto);
-            } else {
-                return valorCompra;
-            }
-    }
-
-    private void verificaAumentoDelimite (Double valorCompra, TipoCliente tipoCliente, String numeroConta) throws ContaNaoEncontradaException {
-            if (tipoCliente.isAumentaLimiteLiberado() && valorCompra >= tipoCliente.getValorGastoParaAumentoLimite()){
-                var conta = contaService.buscarContaPorNumeroConta(numeroConta);
-                conta.setLimite(conta.getLimite() + tipoCliente.getValorDeAumentoLimite());
-            }
+            return compra;
         }
+    }
 
+    private Double verificaDescontoCompra(Double valorCompra, TipoCliente tipoCliente) {
+        var desconto = tipoCliente.getPercentualDesconto();
+        var varloMinimoParaDesconto = tipoCliente.getValorMinimoCompraParaTerDesconto();
+
+        if (valorCompra >= varloMinimoParaDesconto) {
+            return valorCompra - (valorCompra * desconto);
+        } else {
+            return valorCompra;
+        }
+    }
+
+    private void verificaAumentoDelimite(Double valorCompra, TipoCliente tipoCliente, Conta conta){
+        if (tipoCliente.isAumentaLimiteLiberado() && valorCompra >= tipoCliente.getValorGastoParaAumentoLimite()) {
+            conta.setLimite(conta.getLimite() + tipoCliente.getValorDeAumentoLimite());
+        }
+    }
 }

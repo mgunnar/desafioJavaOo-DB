@@ -44,7 +44,7 @@ public class ClienteController {
 
     @GetMapping("/{cpf}/conta")
     public ResponseEntity<ContasResponseDTO> buscarClienteEContaPorCpf(@PathVariable String cpf) throws CpfNaoEncontradoException {
-        var clienteEConta = clienteService.buscarClienteEContaPorCpf(cpf);
+        var clienteEConta = clienteService.buscarContaPorCpf(cpf);
         return ResponseEntity.ok(clienteEConta);
     }
 

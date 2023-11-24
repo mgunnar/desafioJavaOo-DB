@@ -5,7 +5,7 @@ public enum TipoCliente {
     A( 10000, 2000, 0.1, true, 5000,500),
     B( 5000, 1000, 0.05, false, 0, 0),
     C( 1000, 0, 0, false, 0, 0);
-    private double limiteCreditoInicial;
+    private final double limiteCreditoInicial;
     private final double valorMinimoCompraParaTerDesconto;
     private final double percentualDesconto;
     private final boolean aumentaLimiteLiberado;

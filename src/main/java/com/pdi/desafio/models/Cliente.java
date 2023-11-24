@@ -1,5 +1,6 @@
 package com.pdi.desafio.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pdi.desafio.models.enums.TipoCliente;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Entity(name = "clientes")
 @AllArgsConstructor
@@ -26,6 +28,10 @@ public class Cliente {
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_cliente")
     private TipoCliente tipoCliente;
+
+    @OneToMany(mappedBy = "cliente")
+    @JsonIgnore
+    private List<Conta> contas;
 
     public Cliente(String nome, TipoCliente tipoCliente) {
         this.nome = nome;

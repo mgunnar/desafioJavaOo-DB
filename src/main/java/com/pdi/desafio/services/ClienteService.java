@@ -43,12 +43,14 @@ public class ClienteService {
         return clienteRepository.findByCpf(cpf).orElseThrow(() -> new CpfNaoEncontradoException(cpf));
     }
 
-    public ContasResponseDTO buscarClienteEContaPorCpf(String cpf) throws CpfNaoEncontradoException {
+    public ContasResponseDTO buscarContaPorCpf(String cpf) throws CpfNaoEncontradoException {
         var cliente = clienteRepository.findByCpf(cpf).orElseThrow(() -> new CpfNaoEncontradoException(cpf));
-        var conta = contaService.buscarContaPorCpf(cpf);
-
-        return new ContasResponseDTO(cliente, conta);
+        return new ContasResponseDTO(
+                cliente.getContas().get(0).getNumeroConta(),
+                cliente.getContas().get(0).getLimite(),
+                cliente.getContas().get(0).getSaldo(),
+                cliente.getCpf(),
+                cliente.getContas().get(0).getDataCriacao()
+        );
     }
-
-
 }

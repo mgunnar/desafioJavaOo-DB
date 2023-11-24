@@ -1,9 +1,6 @@
 package com.pdi.desafio.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,7 +24,13 @@ public class Conta {
     private String numeroConta;
     private Double limite;
     private Double saldo;
+
+    @Transient
     private String cpfCliente;
+
+    @ManyToOne
+    @JoinColumn(name = "cpfCliente")
+    private Cliente cliente;
 
     @Column(name = "data_criacao")
     private Date dataCriacao;
