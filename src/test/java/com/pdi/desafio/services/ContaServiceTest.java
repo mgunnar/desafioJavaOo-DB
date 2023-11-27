@@ -1,5 +1,6 @@
 package com.pdi.desafio.services;
 
+import com.mysql.cj.x.protobuf.MysqlxDatatypes.Scalar.String;
 import com.pdi.desafio.exceptions.ContaNaoEncontradaException;
 import com.pdi.desafio.models.Cliente;
 import com.pdi.desafio.models.Conta;
@@ -109,5 +110,10 @@ class ContaServiceTest {
         novaConta.setSaldo(novaConta.getLimite());
         novaConta.setDataCriacao(Date.from(ZonedDateTime.now().toInstant()));
         return novaConta;
+    }
+    
+    void testEclipse() {
+    	
+    	assertNull(null);
     }
 }
