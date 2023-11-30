@@ -1,11 +1,12 @@
 package com.pdi.desafio.exceptions;
 
-public class CompraNaoAutorizadaException extends Exception {
+import org.springframework.http.HttpStatus;
 
-    private Double valor;
+public class CompraNaoAutorizadaException extends CustomHttpException {
 
     public CompraNaoAutorizadaException(Double valor) {
-        super("COMPRA NÃO AUTORIZADA!");
-        this.valor = valor;
+    super(HttpStatus.UNAUTHORIZED,"Compra não autorizada no valor de: " + valor);
+
+
     }
 }

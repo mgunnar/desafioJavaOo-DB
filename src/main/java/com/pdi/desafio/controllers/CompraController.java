@@ -2,11 +2,9 @@ package com.pdi.desafio.controllers;
 
 import com.pdi.desafio.exceptions.CompraNaoAutorizadaException;
 import com.pdi.desafio.exceptions.ContaNaoEncontradaException;
-import com.pdi.desafio.exceptions.CpfNaoEncontradoException;
 import com.pdi.desafio.models.Compra;
 import com.pdi.desafio.models.DTOs.CompraRequestDTO;
 import com.pdi.desafio.services.CompraService;
-import com.pdi.desafio.services.ContaService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +22,13 @@ public class CompraController {
 
     @Autowired
     private CompraService compraService;
-
-    @Autowired
-    private ContaService contaService;
-
     @PostMapping("/")
-    public ResponseEntity<Compra> fazerNovaCompra(@RequestBody CompraRequestDTO compraRequest) throws CompraNaoAutorizadaException, ContaNaoEncontradaException, CpfNaoEncontradoException {
-        var compra = compraService.efetuarCompra(compraRequest.numeroConta(), compraRequest.valor());
-        return ResponseEntity.ok(compra);
+    public ResponseEntity<Compra> fazerNovaCompra(@RequestBody CompraRequestDTO compraRequest) throws CompraNaoAutorizadaException, ContaNaoEncontradaException {
+        try {
+            var compra = compraService.efetuarCompra(compraRequest.numeroConta(), compraRequest.valor());
+            return ResponseEntity.ok(compra);
+        } catch (CompraNaoAutorizadaException e){
+            throw new CompraNaoAutorizadaException(compraRequest.valor());
+        }
     }
 }
