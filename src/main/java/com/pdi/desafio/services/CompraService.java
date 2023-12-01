@@ -34,8 +34,7 @@ public class CompraService {
         if (conta.getSaldo() < valor) {
             throw new CompraNaoAutorizadaException(valor);
         } else {
-
-            var compraValidadaComDesconto = verificaDescontoCompra(valor, cliente.getTipoCliente());
+            var compraValidadaComDesconto = verificaDescontoCompra(valor, cliente.getTipoCliente(), conta);
             verificaAumentoDelimite(valor, cliente.getTipoCliente(), conta);
 
             conta.setSaldo(conta.getSaldo() - compraValidadaComDesconto);
@@ -47,16 +46,26 @@ public class CompraService {
         }
     }
 
-    private Double verificaDescontoCompra(Double valorCompra, TipoCliente tipoCliente) {
-        var desconto = tipoCliente.getPercentualDesconto();
-        var varloMinimoParaDesconto = tipoCliente.getValorMinimoCompraParaTerDesconto();
 
-        if (valorCompra >= varloMinimoParaDesconto) {
-            return valorCompra - (valorCompra * desconto);
-        } else {
-            return valorCompra;
+    private Double verificaDescontoCompra(Double valorCompra, TipoCliente tipoCliente, Conta conta) {
+        if (valorCompra == null || tipoCliente == null || conta == null) {
+            throw new IllegalArgumentException("valorCompra, tipoCliente e conta não podem ser nulos.");
         }
+
+        var desconto = tipoCliente.getPercentualDesconto();
+        var valorMinimoParaDesconto = tipoCliente.getValorMinimoCompraParaTerDesconto();
+
+        if (valorCompra >= valorMinimoParaDesconto) {
+            valorCompra -= valorCompra * (desconto);
+
+            if (tipoCliente.isAumentaLimiteLiberado() && valorCompra >= tipoCliente.getValorGastoParaAumentoLimite()) {
+                conta.setLimite(conta.getLimite() + tipoCliente.getValorDeAumentoLimite());
+            }
+        }
+        return valorCompra;
     }
+
+
 
     private void verificaAumentoDelimite(Double valorCompra, TipoCliente tipoCliente, Conta conta){
         if (tipoCliente.isAumentaLimiteLiberado() && valorCompra >= tipoCliente.getValorGastoParaAumentoLimite()) {

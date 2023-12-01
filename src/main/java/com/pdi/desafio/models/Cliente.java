@@ -33,9 +33,10 @@ public class Cliente {
     @JsonIgnore
     private List<Conta> contas;
 
-    public Cliente(String nome, TipoCliente tipoCliente) {
+    public Cliente(String cpf, String nome, TipoCliente tipoCliente) {
         this.nome = nome;
         this.tipoCliente = tipoCliente;
+        this.cpf = cpf;
     }
 
     public void setTipoCliente(TipoCliente tipoCliente) {

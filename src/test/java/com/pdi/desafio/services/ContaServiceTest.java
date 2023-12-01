@@ -39,7 +39,7 @@ class ContaServiceTest {
     private static final String NUMERO_CONTA = "00001";
 
     @Test
-    void deveCriarContaComSucesso() {
+    void deveCriarConta() {
         var cliente = new Cliente();
         cliente.setCpf(CPF);
         cliente.setNome(NOME);
@@ -62,7 +62,7 @@ class ContaServiceTest {
     }
 
     @Test
-    void testSalvarConta() {
+    void deveSalvarConta() {
         Conta contaParaSalvar = new Conta();
 
         when(contaRepositoryMock.save(contaParaSalvar)).thenReturn(contaParaSalvar);
@@ -75,7 +75,7 @@ class ContaServiceTest {
     }
 
     @Test
-    void testBuscarContaPorNumeroConta() throws ContaNaoEncontradaException {
+    void deveBuscarContaPorNumeroConta() throws ContaNaoEncontradaException {
 
         String numeroConta = "00001";
 
@@ -89,7 +89,7 @@ class ContaServiceTest {
     }
 
     @Test
-    void testConsultarSaldo() throws ContaNaoEncontradaException {
+    void deveConsultarSaldo() throws ContaNaoEncontradaException {
         String numeroConta = "00001";
 
         when(contaRepositoryMock.findByNumeroConta(numeroConta)).thenReturn(Optional.of(new Conta()));
@@ -99,6 +99,21 @@ class ContaServiceTest {
         verify(contaRepositoryMock, times(1)).findByNumeroConta(numeroConta);
 
         assertTrue(resultado.contains("O limite disponível é:"));
+    }
+
+
+    @Test
+    public void devePagarFaturaIntegralmente() throws ContaNaoEncontradaException {
+        var conta = configurarConta(new Cliente(CPF, NOME, TIPO_CLIENTE));
+
+        when(contaRepositoryMock.findByNumeroConta(NUMERO_CONTA)).thenReturn(Optional.of(conta));
+
+        String resultado = contaService.pagarFaturaIntegralmente(NUMERO_CONTA);
+
+        verify(contaRepositoryMock, times(1)).findByNumeroConta(NUMERO_CONTA);
+
+        assertEquals("Fatura paga com sucesso!", resultado);
+        assertEquals(conta.getLimite(), conta.getSaldo());
     }
 
     private Conta configurarConta(Cliente cliente) {
