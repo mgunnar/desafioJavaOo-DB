@@ -35,7 +35,7 @@ public class CompraService {
             throw new CompraNaoAutorizadaException(valor);
         } else {
             var compraValidadaComDesconto = verificaDescontoCompra(valor, cliente.getTipoCliente(), conta);
-            verificaAumentoDelimite(valor, cliente.getTipoCliente(), conta);
+            verificaAumentoDeLimite(valor, cliente.getTipoCliente(), conta);
 
             conta.setSaldo(conta.getSaldo() - compraValidadaComDesconto);
 
@@ -67,7 +67,7 @@ public class CompraService {
 
 
 
-    private void verificaAumentoDelimite(Double valorCompra, TipoCliente tipoCliente, Conta conta){
+    private void verificaAumentoDeLimite(Double valorCompra, TipoCliente tipoCliente, Conta conta){
         if (tipoCliente.isAumentaLimiteLiberado() && valorCompra >= tipoCliente.getValorGastoParaAumentoLimite()) {
             conta.setLimite(conta.getLimite() + tipoCliente.getValorDeAumentoLimite());
         }

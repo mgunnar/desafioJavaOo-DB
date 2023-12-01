@@ -22,12 +22,11 @@ class ContaServiceTest {
     ContaRepository contaRepositoryMock = Mockito.mock(ContaRepository.class);
     @InjectMocks
     private ContaService contaService;
-    private ClienteService clienteService;
 
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
-        contaService = new ContaService(contaRepositoryMock, clienteService);
+        contaService = new ContaService(contaRepositoryMock);
     }
 
     @Test

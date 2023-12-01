@@ -5,8 +5,6 @@ import com.pdi.desafio.models.Cliente;
 import com.pdi.desafio.models.DTOs.ClienteRequestDTO;
 import com.pdi.desafio.models.DTOs.ContasResponseDTO;
 import com.pdi.desafio.repository.ClienteRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,10 +12,7 @@ import java.util.List;
 @Service
 public class ClienteService {
     private final ClienteRepository clienteRepository;
-
-    @Autowired
-    @Lazy
-    private ContaService contaService;
+    private final ContaService contaService;
 
     public ClienteService(ClienteRepository clienteRepository, ContaService contaService) {
         this.contaService = contaService;
@@ -30,7 +25,6 @@ public class ClienteService {
         novoCliente.setCpf(cliente.cpf());
         novoCliente.setNome(cliente.nome().toUpperCase());
         novoCliente.setTipoCliente(cliente.tipoCliente());
-
         contaService.criarConta(novoCliente);
 
         return clienteRepository.save(novoCliente);
@@ -46,16 +40,8 @@ public class ClienteService {
 
     public ContasResponseDTO buscarContaPorCpf(String cpf) throws CpfNaoEncontradoException {
         var cliente = clienteRepository.findByCpf(cpf).orElseThrow(() -> new CpfNaoEncontradoException(cpf));
-        return new ContasResponseDTO(
-                cliente.getContas().get(0).getNumeroConta(),
-                cliente.getContas().get(0).getLimite(),
-                cliente.getContas().get(0).getSaldo(),
-                cliente.getCpf(),
-                cliente.getContas().get(0).getDataCriacao()
-        );
+        return new ContasResponseDTO(cliente.getContas().get(0).getNumeroConta(), cliente.getContas().get(0).getLimite(), cliente.getContas().get(0).getSaldo(), cliente.getCpf(), cliente.getContas().get(0).getDataCriacao());
     }
-
-
 
 
 }

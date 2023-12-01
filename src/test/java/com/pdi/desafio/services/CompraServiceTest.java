@@ -54,16 +54,17 @@ class CompraServiceTest {
     @Test
     void deveRealizarCompra() throws ContaNaoEncontradaException, CompraNaoAutorizadaException {
         double valorCompra = 1000;
-
         var cliente = ClienteFixture.build();
         var conta = ContaFixture.build(cliente);
-
+        var limiteAntesDaCompra = conta.getLimite();
         when(contaServiceMock.buscarContaPorNumeroConta(conta.getNumeroConta())).thenReturn(conta);
 
         var resultado = compraService.efetuarCompra(conta.getNumeroConta(), valorCompra);
 
+        var limitePosCompra = conta.getLimite();
         assertEquals(conta.getNumeroConta(), resultado.getNumeroConta());
         assertEquals(valorCompra, resultado.getValor(), 0.0);
+        assertEquals(limitePosCompra - limiteAntesDaCompra,cliente.getTipoCliente().getValorDeAumentoLimite(),0);
 
         verify(contaServiceMock, atLeastOnce()).buscarContaPorNumeroConta(conta.getNumeroConta());
     }
@@ -152,7 +153,7 @@ class CompraServiceTest {
         var conta = ContaFixture.build(ClienteFixture.build(CPF, NOME, tipoCliente));
 
 
-        Method verificaAumentoDelimite = CompraService.class.getDeclaredMethod("verificaAumentoDelimite", Double.class, TipoCliente.class, Conta.class);
+        Method verificaAumentoDelimite = CompraService.class.getDeclaredMethod("verificaAumentoDeLimite", Double.class, TipoCliente.class, Conta.class);
         verificaAumentoDelimite.setAccessible(true);
 
         verificaAumentoDelimite.invoke(compraService, 5000.0, tipoCliente, conta);

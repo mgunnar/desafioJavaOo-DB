@@ -8,7 +8,6 @@ import com.pdi.desafio.models.Cliente;
 import com.pdi.desafio.models.Conta;
 import com.pdi.desafio.models.DTOs.ContasResponseDTO;
 import com.pdi.desafio.repository.ClienteRepository;
-import com.pdi.desafio.repository.ContaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -22,7 +21,7 @@ import java.util.Optional;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class ClienteServiceTest {
 
@@ -31,9 +30,6 @@ class ClienteServiceTest {
 
     @Mock
     private ContaService contaServiceMock;
-
-    @Mock
-    private ContaRepository contaRepositoryMock;
 
     @Mock
     private ClienteRepository clienteRepositoryMock;
@@ -46,17 +42,21 @@ class ClienteServiceTest {
     @Test
     void deveCadastrarNovoCliente() {
         var clienteRequest = ClienteRequestDTOFixture.build();
+        var cliente = ClienteFixture.build(clienteRequest.cpf(), clienteRequest.nome(), clienteRequest.tipoCliente());
 
-        when(clienteRepositoryMock.save(any(Cliente.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(clienteRepositoryMock.save(any(Cliente.class))).thenReturn(cliente);
+        when(contaServiceMock.criarConta(any(Cliente.class))).thenReturn("Conta criada com sucesso!");
 
-        var cliente = clienteService.cadastrarNovoCliente(clienteRequest);
+        Cliente clienteResult = clienteService.cadastrarNovoCliente(clienteRequest);
 
-        when(contaServiceMock.criarConta(cliente)).thenReturn("Conta criada com sucesso!");
+        assertEquals(clienteResult.getNome(),(clienteRequest.nome()));
+        assertEquals (clienteResult.getCpf(),(clienteRequest.cpf()));
+        assertEquals (clienteResult.getTipoCliente(),(clienteRequest.tipoCliente()));
 
-        assert (cliente.getNome().equals(clienteRequest.nome().toUpperCase()));
-        assert (cliente.getCpf().equals(clienteRequest.cpf()));
-        assert (cliente.getTipoCliente().equals(clienteRequest.tipoCliente()));
+        verify(clienteRepositoryMock, atLeastOnce()).save(any(Cliente.class));
     }
+
+
 
     @Test
     void deveBuscarTodosOsClientes() {

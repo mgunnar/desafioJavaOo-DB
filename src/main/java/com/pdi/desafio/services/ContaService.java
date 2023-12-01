@@ -18,9 +18,6 @@ public class ContaService {
     @Autowired
     private ContaRepository contaRepository;
 
-    @Autowired
-    private ClienteService clienteService;
-
     public String criarConta(Cliente cliente) {
         var novaConta = new Conta();
 
