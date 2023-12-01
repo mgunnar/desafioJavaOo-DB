@@ -1,9 +1,9 @@
 package com.pdi.desafio.services;
 
+import com.pdi.desafio.Fixture.ClienteFixture;
+import com.pdi.desafio.Fixture.ContaFixture;
 import com.pdi.desafio.exceptions.ContaNaoEncontradaException;
-import com.pdi.desafio.models.Cliente;
 import com.pdi.desafio.models.Conta;
-import com.pdi.desafio.models.enums.TipoCliente;
 import com.pdi.desafio.repository.ContaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,8 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,12 +18,11 @@ import static org.mockito.Mockito.*;
 
 class ContaServiceTest {
 
+    private static final String NUMERO_CONTA = "00001";
+    ContaRepository contaRepositoryMock = Mockito.mock(ContaRepository.class);
     @InjectMocks
     private ContaService contaService;
-
     private ClienteService clienteService;
-
-    ContaRepository contaRepositoryMock = Mockito.mock(ContaRepository.class);
 
     @BeforeEach
     void setup() {
@@ -33,19 +30,10 @@ class ContaServiceTest {
         contaService = new ContaService(contaRepositoryMock, clienteService);
     }
 
-    private static final String CPF = "12345678900";
-    private static final String NOME = "Teste";
-    private static final TipoCliente TIPO_CLIENTE = TipoCliente.A;
-    private static final String NUMERO_CONTA = "00001";
-
     @Test
     void deveCriarConta() {
-        var cliente = new Cliente();
-        cliente.setCpf(CPF);
-        cliente.setNome(NOME);
-        cliente.setTipoCliente(TIPO_CLIENTE);
-
-        var novaConta = configurarConta(cliente);
+        var cliente = ClienteFixture.build();
+        var novaConta = ContaFixture.build(cliente);
 
         when(contaRepositoryMock.save(novaConta)).thenReturn(novaConta);
 
@@ -54,22 +42,20 @@ class ContaServiceTest {
         verify(contaRepositoryMock, atLeastOnce()).save(any(Conta.class));
 
         assertEquals("Conta criada com sucesso!", resultado);
-
-        assertEquals(NUMERO_CONTA, novaConta.getNumeroConta());
-        assertEquals(TIPO_CLIENTE.getLimiteCreditoInicial(), novaConta.getLimite());
-        assertEquals(CPF, novaConta.getCpfCliente());
+        assertEquals(cliente.getTipoCliente().getLimiteCreditoInicial(), novaConta.getLimite());
+        assertEquals(cliente.getCpf(), novaConta.getCpfCliente());
         assertEquals(novaConta.getLimite(), novaConta.getSaldo());
     }
 
     @Test
     void deveSalvarConta() {
-        Conta contaParaSalvar = new Conta();
+        var contaParaSalvar = ContaFixture.build(ClienteFixture.build());
 
         when(contaRepositoryMock.save(contaParaSalvar)).thenReturn(contaParaSalvar);
 
-        Conta contaSalva = contaService.salvarConta(contaParaSalvar);
+        var contaSalva = contaService.salvarConta(contaParaSalvar);
 
-        verify(contaRepositoryMock, times(1)).save(contaParaSalvar); // Verifica se o método save foi chamado exatamente uma vez com a contaParaSalvar
+        verify(contaRepositoryMock, times(1)).save(contaParaSalvar);
 
         assertEquals(contaParaSalvar, contaSalva);
     }
@@ -77,52 +63,38 @@ class ContaServiceTest {
     @Test
     void deveBuscarContaPorNumeroConta() throws ContaNaoEncontradaException {
 
-        String numeroConta = "00001";
+        when(contaRepositoryMock.findByNumeroConta(NUMERO_CONTA)).thenReturn(Optional.of(new Conta()));
 
-        when(contaRepositoryMock.findByNumeroConta(numeroConta)).thenReturn(Optional.of(new Conta()));
+        Conta contaEncontrada = contaService.buscarContaPorNumeroConta(NUMERO_CONTA);
 
-        Conta contaEncontrada = contaService.buscarContaPorNumeroConta(numeroConta);
-
-        verify(contaRepositoryMock, times(1)).findByNumeroConta(numeroConta);
+        verify(contaRepositoryMock, times(1)).findByNumeroConta(NUMERO_CONTA);
 
         assertNotNull(contaEncontrada);
     }
 
     @Test
     void deveConsultarSaldo() throws ContaNaoEncontradaException {
-        String numeroConta = "00001";
 
-        when(contaRepositoryMock.findByNumeroConta(numeroConta)).thenReturn(Optional.of(new Conta()));
+        when(contaRepositoryMock.findByNumeroConta(NUMERO_CONTA)).thenReturn(Optional.of(ContaFixture.build(ClienteFixture.build())));
 
-        String resultado = contaService.consultarSaldo(numeroConta);
+        String resultado = contaService.consultarSaldo(NUMERO_CONTA);
 
-        verify(contaRepositoryMock, times(1)).findByNumeroConta(numeroConta);
+        verify(contaRepositoryMock, times(1)).findByNumeroConta(NUMERO_CONTA);
 
         assertTrue(resultado.contains("O limite disponível é:"));
     }
 
-
     @Test
     public void devePagarFaturaIntegralmente() throws ContaNaoEncontradaException {
-        var conta = configurarConta(new Cliente(CPF, NOME, TIPO_CLIENTE));
+        var conta = ContaFixture.build(ClienteFixture.build());
 
-        when(contaRepositoryMock.findByNumeroConta(NUMERO_CONTA)).thenReturn(Optional.of(conta));
+        when(contaRepositoryMock.findByNumeroConta(conta.getNumeroConta())).thenReturn(Optional.of(conta));
 
-        String resultado = contaService.pagarFaturaIntegralmente(NUMERO_CONTA);
+        String resultado = contaService.pagarFaturaIntegralmente(conta.getNumeroConta());
 
-        verify(contaRepositoryMock, times(1)).findByNumeroConta(NUMERO_CONTA);
+        verify(contaRepositoryMock, times(1)).findByNumeroConta(conta.getNumeroConta());
 
         assertEquals("Fatura paga com sucesso!", resultado);
         assertEquals(conta.getLimite(), conta.getSaldo());
-    }
-
-    private Conta configurarConta(Cliente cliente) {
-        var novaConta = new Conta();
-        novaConta.setNumeroConta(NUMERO_CONTA);
-        novaConta.setLimite(cliente.getTipoCliente().getLimiteCreditoInicial());
-        novaConta.setCpfCliente(cliente.getCpf());
-        novaConta.setSaldo(novaConta.getLimite());
-        novaConta.setDataCriacao(Date.from(ZonedDateTime.now().toInstant()));
-        return novaConta;
     }
 }

@@ -1,13 +1,15 @@
 package com.pdi.desafio.services;
 
+import com.pdi.desafio.Fixture.ClienteFixture;
+import com.pdi.desafio.Fixture.ContaFixture;
 import com.pdi.desafio.exceptions.CompraNaoAutorizadaException;
 import com.pdi.desafio.exceptions.ContaNaoEncontradaException;
 import com.pdi.desafio.models.Cliente;
-import com.pdi.desafio.models.Compra;
 import com.pdi.desafio.models.Conta;
 import com.pdi.desafio.models.enums.TipoCliente;
 import com.pdi.desafio.repository.CompraRepository;
 import com.pdi.desafio.repository.ContaRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -51,35 +53,34 @@ class CompraServiceTest {
 
     @Test
     void deveRealizarCompra() throws ContaNaoEncontradaException, CompraNaoAutorizadaException {
-        String numeroConta = "00001";
         double valorCompra = 1000;
 
-        var compra = new Compra(1L,valorCompra, NUMERO_CONTA, Date.from(ZonedDateTime.now().toInstant()));
-        var cliente = new Cliente(CPF, NOME, TIPO_CLIENTE);
-        var conta = configurarConta(cliente);
-        conta.setCliente(cliente);
+        var cliente = ClienteFixture.build();
+        var conta = ContaFixture.build(cliente);
 
-        when(contaServiceMock.buscarContaPorNumeroConta(numeroConta)).thenReturn(conta);
+        when(contaServiceMock.buscarContaPorNumeroConta(conta.getNumeroConta())).thenReturn(conta);
 
-        Compra resultado = compraService.efetuarCompra(numeroConta, valorCompra);
+        var resultado = compraService.efetuarCompra(conta.getNumeroConta(), valorCompra);
 
-        assertEquals(numeroConta, resultado.getNumeroConta());
+        assertEquals(conta.getNumeroConta(), resultado.getNumeroConta());
         assertEquals(valorCompra, resultado.getValor(), 0.0);
 
-        verify(contaServiceMock, atLeastOnce()).buscarContaPorNumeroConta(numeroConta);
+        verify(contaServiceMock, atLeastOnce()).buscarContaPorNumeroConta(conta.getNumeroConta());
     }
 
     @Test
     void naoAplicaDescontoCompra() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         double valorCompra = 1000;
-        var tipoCliente = TipoCliente.C;
 
         Method verificaDescontoCompra = CompraService.class.getDeclaredMethod("verificaDescontoCompra", Double.class, TipoCliente.class, Conta.class);
+
         verificaDescontoCompra.setAccessible(true);
 
-        Conta conta = configurarConta(new Cliente(CPF, NOME, tipoCliente));
+        var conta = ContaFixture.build(ClienteFixture.build());
 
-        double resultado = (Double) verificaDescontoCompra.invoke(compraService, valorCompra, tipoCliente, conta);
+        conta.getCliente().setTipoCliente(TipoCliente.A);
+
+        double resultado = (Double) verificaDescontoCompra.invoke(compraService, valorCompra, conta.getCliente().getTipoCliente(), conta);
 
         assertEquals(valorCompra, resultado, 0);
     }
@@ -89,13 +90,14 @@ class CompraServiceTest {
     void aplicaDescontoCompra() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         double valorCompra = 10000;
         double valorCompraComDesconto = 9000;
-        var tipoCliente = TipoCliente.A;
-        var conta = configurarConta(new Cliente(CPF, NOME, tipoCliente));
+        var conta = ContaFixture.build(ClienteFixture.build());
+
+        conta.getCliente().setTipoCliente(TipoCliente.A);
 
         Method verificaDescontoCompra = CompraService.class.getDeclaredMethod("verificaDescontoCompra", Double.class, TipoCliente.class, Conta.class);
         verificaDescontoCompra.setAccessible(true);
 
-        double resultado = (Double) verificaDescontoCompra.invoke(compraService, valorCompra, tipoCliente, conta);
+        double resultado = (Double) verificaDescontoCompra.invoke(compraService, valorCompra, conta.getCliente().getTipoCliente(), conta);
 
         assertEquals(valorCompraComDesconto, resultado, 0);
     }
@@ -120,7 +122,8 @@ class CompraServiceTest {
 
     @Test
     void efetuarCompraCompraNaoAutorizada() throws ContaNaoEncontradaException {
-        var conta = configurarConta(new Cliente(CPF, NOME, TipoCliente.A));
+        var conta = ContaFixture.build(ClienteFixture.build());
+        conta.getCliente().setTipoCliente(TipoCliente.A);
 
         when(contaServiceMock.buscarContaPorNumeroConta(anyString())).thenReturn(conta);
 
@@ -137,16 +140,16 @@ class CompraServiceTest {
         ContaNaoEncontradaException exception = assertThrows(ContaNaoEncontradaException.class,
                 () -> compraService.efetuarCompra(NUMERO_CONTA, 1000.0));
 
-        assertEquals("400 BAD_REQUEST - Conta não encontrada com número: "+ NUMERO_CONTA, exception.getMessage());
+        Assertions.assertEquals("400 BAD_REQUEST - Conta não encontrada com número: "+ NUMERO_CONTA, exception.getMessage());
 
         verify(contaServiceMock, atLeastOnce()).buscarContaPorNumeroConta(NUMERO_CONTA);
     }
 
     @Test
-    void verificaAumentoDelimite_AumentoDeveOcorrer() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    void verificaAumentoDelimiteAumentoDeveOcorrer() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         TipoCliente tipoCliente = TipoCliente.A;
 
-        var conta = configurarConta(new Cliente(CPF, NOME, tipoCliente));
+        var conta = ContaFixture.build(ClienteFixture.build(CPF, NOME, tipoCliente));
 
 
         Method verificaAumentoDelimite = CompraService.class.getDeclaredMethod("verificaAumentoDelimite", Double.class, TipoCliente.class, Conta.class);

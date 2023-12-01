@@ -19,7 +19,8 @@ public class ClienteService {
     @Lazy
     private ContaService contaService;
 
-    public ClienteService(ClienteRepository clienteRepository) {
+    public ClienteService(ClienteRepository clienteRepository, ContaService contaService) {
+        this.contaService = contaService;
         this.clienteRepository = clienteRepository;
     }
 
@@ -53,4 +54,8 @@ public class ClienteService {
                 cliente.getContas().get(0).getDataCriacao()
         );
     }
+
+
+
+
 }
