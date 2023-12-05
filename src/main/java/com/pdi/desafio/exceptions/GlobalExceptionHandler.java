@@ -14,5 +14,4 @@ public class GlobalExceptionHandler {
     //Implementar transaction e fazer testes unitários
     //Teste para tipoCliente
     // Transaction na hora pagar conta.
-    //
 }

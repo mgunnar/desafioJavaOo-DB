@@ -7,6 +7,7 @@ import com.pdi.desafio.repository.ContaRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -18,6 +19,7 @@ public class ContaService {
     @Autowired
     private ContaRepository contaRepository;
 
+    @Transactional
     public String criarConta(Cliente cliente) {
         var novaConta = new Conta();
 
@@ -33,20 +35,23 @@ public class ContaService {
         return "Conta criada com sucesso!";
     }
 
+    @Transactional
     public Conta salvarConta(Conta conta) {
         return contaRepository.save(conta);
     }
 
-     public Conta buscarContaPorNumeroConta(String numeroConta) throws ContaNaoEncontradaException {
-        return contaRepository.findByNumeroConta(numeroConta)
-                .orElseThrow(() -> new ContaNaoEncontradaException(numeroConta));
-     }
+    @Transactional
+    public Conta buscarContaPorNumeroConta(String numeroConta) throws ContaNaoEncontradaException {
+        return contaRepository.findByNumeroConta(numeroConta).orElseThrow(() -> new ContaNaoEncontradaException(numeroConta));
+    }
 
-     public String consultarSaldo(String numeroConta) throws ContaNaoEncontradaException {
+    @Transactional
+    public String consultarSaldo(String numeroConta) throws ContaNaoEncontradaException {
         var conta = contaRepository.findByNumeroConta(numeroConta).orElseThrow(() -> new ContaNaoEncontradaException(numeroConta));
-        return "O limite disponível é:" +conta.getSaldo();
-     }
+        return "O limite disponível é:" + conta.getSaldo();
+    }
 
+    @Transactional
     public String pagarFaturaIntegralmente(String numeroConta) throws ContaNaoEncontradaException {
         var conta = buscarContaPorNumeroConta(numeroConta);
         conta.setSaldo(conta.getLimite());

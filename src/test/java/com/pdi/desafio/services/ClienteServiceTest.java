@@ -4,6 +4,7 @@ import com.pdi.desafio.Fixture.ClienteFixture;
 import com.pdi.desafio.Fixture.ClienteRequestDTOFixture;
 import com.pdi.desafio.Fixture.ContaFixture;
 import com.pdi.desafio.exceptions.CpfNaoEncontradoException;
+import com.pdi.desafio.exceptions.RuntimeTransacaoNaoConcluida;
 import com.pdi.desafio.models.Cliente;
 import com.pdi.desafio.models.Conta;
 import com.pdi.desafio.models.DTOs.ContasResponseDTO;
@@ -40,7 +41,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    void deveCadastrarNovoCliente() {
+    void deveCadastrarNovoCliente() throws RuntimeTransacaoNaoConcluida {
         var clienteRequest = ClienteRequestDTOFixture.build();
         var cliente = ClienteFixture.build(clienteRequest.cpf(), clienteRequest.nome(), clienteRequest.tipoCliente());
 
