@@ -1,11 +1,10 @@
 package com.pdi.desafio.exceptions;
 
-public class ContaNaoEncontradaException extends Exception {
+import org.springframework.http.HttpStatus;
 
-    private String conta;
+public class ContaNaoEncontradaException extends CustomHttpException {
 
     public ContaNaoEncontradaException(String conta) {
-        super("CONTA NÃO ENCONTRADA.");
-        this.conta = conta;
+        super(HttpStatus.BAD_REQUEST,"Conta não encontrada com número: " + conta);
     }
 }

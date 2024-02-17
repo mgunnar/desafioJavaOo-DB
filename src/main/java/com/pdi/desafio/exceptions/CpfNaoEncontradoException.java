@@ -1,11 +1,9 @@
 package com.pdi.desafio.exceptions;
 
-public class CpfNaoEncontradoException extends Exception {
+import org.springframework.http.HttpStatus;
 
-    private String cpf;
-
+public class CpfNaoEncontradoException extends CustomHttpException{
     public CpfNaoEncontradoException(String cpf) {
-        super("Cliente não encontrado com CPF: " + cpf);
-        this.cpf = cpf;
+        super(HttpStatus.NOT_FOUND, "Cliente não encontrado com CPF: " + cpf);
     }
 }

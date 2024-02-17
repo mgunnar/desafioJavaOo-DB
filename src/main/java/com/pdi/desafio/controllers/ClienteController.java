@@ -1,6 +1,7 @@
 package com.pdi.desafio.controllers;
 
 import com.pdi.desafio.exceptions.CpfNaoEncontradoException;
+import com.pdi.desafio.exceptions.RuntimeTransacaoNaoConcluida;
 import com.pdi.desafio.models.Cliente;
 import com.pdi.desafio.models.DTOs.ClienteRequestDTO;
 import com.pdi.desafio.models.DTOs.ContasResponseDTO;
@@ -25,7 +26,7 @@ public class ClienteController {
 
 
     @PostMapping("/")
-    public ResponseEntity<Cliente> cadastrarNovoCliente(@RequestBody ClienteRequestDTO cliente) {
+    public ResponseEntity<Cliente> cadastrarNovoCliente(@RequestBody ClienteRequestDTO cliente) throws RuntimeTransacaoNaoConcluida {
         var clienteSalvo = clienteService.cadastrarNovoCliente(cliente);
         return ResponseEntity.status(HttpStatus.CREATED).body(clienteSalvo);
     }
@@ -44,7 +45,7 @@ public class ClienteController {
 
     @GetMapping("/{cpf}/conta")
     public ResponseEntity<ContasResponseDTO> buscarClienteEContaPorCpf(@PathVariable String cpf) throws CpfNaoEncontradoException {
-        var clienteEConta = clienteService.buscarClienteEContaPorCpf(cpf);
+        var clienteEConta = clienteService.buscarContaPorCpf(cpf);
         return ResponseEntity.ok(clienteEConta);
     }
 
