@@ -8,10 +8,7 @@ import com.pdi.desafio.models.Cliente;
 import com.pdi.desafio.models.Conta;
 import com.pdi.desafio.models.enums.TipoCliente;
 import com.pdi.desafio.repository.CompraRepository;
-import com.pdi.desafio.repository.ContaRepository;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -25,6 +22,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 
+//todo remover orders
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CompraServiceTest {
 
     @InjectMocks
@@ -32,12 +31,6 @@ class CompraServiceTest {
 
     @Mock
     private ContaService contaServiceMock;
-
-    @Mock
-    private ClienteService clienteServiceMock;
-
-    @Mock
-    private ContaRepository contaRepositoryMock;
 
     @Mock
     private CompraRepository compraRepositoryMock;
@@ -51,39 +44,24 @@ class CompraServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
+
     @Test
     void deveRealizarCompra() throws ContaNaoEncontradaException, CompraNaoAutorizadaException {
         double valorCompra = 1000;
         var cliente = ClienteFixture.build();
         var conta = ContaFixture.build(cliente);
         var limiteAntesDaCompra = conta.getLimite();
+
         when(contaServiceMock.buscarContaPorNumeroConta(conta.getNumeroConta())).thenReturn(conta);
 
-        var resultado = compraService.efetuarCompra(conta.getNumeroConta(), valorCompra);
+        compraService.efetuarCompra(conta.getNumeroConta(), valorCompra);
 
         var limitePosCompra = conta.getLimite();
-        assertEquals(conta.getNumeroConta(), resultado.getNumeroConta());
-        assertEquals(valorCompra, resultado.getValor(), 0.0);
-        assertEquals(limitePosCompra - limiteAntesDaCompra,cliente.getTipoCliente().getValorDeAumentoLimite(),0);
+        var diferencaLimiteAntesEPosCompra = limitePosCompra - limiteAntesDaCompra;
+
+        Assertions.assertEquals(diferencaLimiteAntesEPosCompra, 0);
 
         verify(contaServiceMock, atLeastOnce()).buscarContaPorNumeroConta(conta.getNumeroConta());
-    }
-
-    @Test
-    void naoAplicaDescontoCompra() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        double valorCompra = 1000;
-
-        Method verificaDescontoCompra = CompraService.class.getDeclaredMethod("verificaDescontoCompra", Double.class, TipoCliente.class, Conta.class);
-
-        verificaDescontoCompra.setAccessible(true);
-
-        var conta = ContaFixture.build(ClienteFixture.build());
-
-        conta.getCliente().setTipoCliente(TipoCliente.A);
-
-        double resultado = (Double) verificaDescontoCompra.invoke(compraService, valorCompra, conta.getCliente().getTipoCliente(), conta);
-
-        assertEquals(valorCompra, resultado, 0);
     }
 
 
@@ -95,30 +73,12 @@ class CompraServiceTest {
 
         conta.getCliente().setTipoCliente(TipoCliente.A);
 
-        Method verificaDescontoCompra = CompraService.class.getDeclaredMethod("verificaDescontoCompra", Double.class, TipoCliente.class, Conta.class);
+        Method verificaDescontoCompra = CompraService.class.getDeclaredMethod("verificaDescontoCompra", Double.class, Conta.class);
         verificaDescontoCompra.setAccessible(true);
 
-        double resultado = (Double) verificaDescontoCompra.invoke(compraService, valorCompra, conta.getCliente().getTipoCliente(), conta);
+        double resultado = (Double) verificaDescontoCompra.invoke(compraService, valorCompra, conta);
 
-        assertEquals(valorCompraComDesconto, resultado, 0);
-    }
-
-    @Test
-    void verificaDescontoCompraParametrosNulos() throws NoSuchMethodException {
-        Double valorCompra = null;
-        TipoCliente tipoCliente = null;
-        Conta conta = null;
-
-        Method metodoPrivado = CompraService.class.getDeclaredMethod("verificaDescontoCompra", Double.class, TipoCliente.class, Conta.class);
-        metodoPrivado.setAccessible(true);
-
-        InvocationTargetException exception = assertThrows(InvocationTargetException.class, () ->
-                metodoPrivado.invoke(compraService, valorCompra, tipoCliente, conta));
-
-        Throwable cause = exception.getCause();
-
-        assertEquals(IllegalArgumentException.class, cause.getClass());
-        assertEquals("valorCompra, tipoCliente e conta não podem ser nulos.", cause.getMessage());
+        Assertions.assertEquals(valorCompraComDesconto, resultado, 0);
     }
 
     @Test
@@ -146,22 +106,6 @@ class CompraServiceTest {
         verify(contaServiceMock, atLeastOnce()).buscarContaPorNumeroConta(NUMERO_CONTA);
     }
 
-    @Test
-    void verificaAumentoDelimiteAumentoDeveOcorrer() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        TipoCliente tipoCliente = TipoCliente.A;
-
-        var conta = ContaFixture.build(ClienteFixture.build(CPF, NOME, tipoCliente));
-
-
-        Method verificaAumentoDelimite = CompraService.class.getDeclaredMethod("verificaAumentoDeLimite", Double.class, TipoCliente.class, Conta.class);
-        verificaAumentoDelimite.setAccessible(true);
-
-        verificaAumentoDelimite.invoke(compraService, 5000.0, tipoCliente, conta);
-
-        assertEquals(10500.0, conta.getLimite(), 0.01);
-    }
-
-
     private Conta configurarConta(Cliente cliente) {
         var novaConta = new Conta();
         novaConta.setNumeroConta(NUMERO_CONTA);
@@ -172,5 +116,4 @@ class CompraServiceTest {
         novaConta.setCliente(cliente);
         return novaConta;
     }
-
 }

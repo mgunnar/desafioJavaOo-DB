@@ -23,10 +23,10 @@ public class CompraController {
     @Autowired
     private CompraService compraService;
     @PostMapping("/")
-    public ResponseEntity<Compra> fazerNovaCompra(@RequestBody CompraRequestDTO compraRequest) throws CompraNaoAutorizadaException, ContaNaoEncontradaException {
+    public ResponseEntity<String> fazerNovaCompra(@RequestBody CompraRequestDTO compraRequest) throws CompraNaoAutorizadaException, ContaNaoEncontradaException {
         try {
-            var compra = compraService.efetuarCompra(compraRequest.numeroConta(), compraRequest.valor());
-            return ResponseEntity.ok(compra);
+            compraService.efetuarCompra(compraRequest.numeroConta(), compraRequest.valor());
+            return ResponseEntity.ok().body("Compra efetuada com sucesso!");
         } catch (CompraNaoAutorizadaException e){
             throw new CompraNaoAutorizadaException(compraRequest.valor());
         }

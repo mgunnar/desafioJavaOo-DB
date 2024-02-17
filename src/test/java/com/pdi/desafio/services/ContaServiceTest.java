@@ -4,7 +4,9 @@ import com.pdi.desafio.Fixture.ClienteFixture;
 import com.pdi.desafio.Fixture.ContaFixture;
 import com.pdi.desafio.exceptions.ContaNaoEncontradaException;
 import com.pdi.desafio.models.Conta;
+import com.pdi.desafio.models.enums.TipoCliente;
 import com.pdi.desafio.repository.ContaRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -13,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -96,4 +99,31 @@ class ContaServiceTest {
         assertEquals("Fatura paga com sucesso!", resultado);
         assertEquals(conta.getLimite(), conta.getSaldo());
     }
+
+    @Test
+    public void deveAumentarLimiteDeCreditoSeDisponivel(){
+        var conta = ContaFixture.build(ClienteFixture.build(TipoCliente.A));
+        var valorCompra = 5001D;
+
+        contaService.aumentaLimiteDeCreditoSeDisponivel(valorCompra,conta);
+
+        var limiteContaAposVerificarAumento = conta.getLimite();
+
+        Assertions.assertEquals(limiteContaAposVerificarAumento,10500);
+    }
+
+    @Test
+    public void deveDescontarValorDeCompraDoLimiteDisponivel(){
+        var conta = ContaFixture.build(ClienteFixture.build(TipoCliente.A));
+        var valorCompra = 5001D;
+        var limiteDisponivelAntesDaCompra = conta.getSaldo();
+
+        contaService.descontaValorCompraDoLimiteDisponivel(conta, valorCompra);
+
+        var limiteDisponivelAposCompra = conta.getSaldo();
+
+        Assertions.assertEquals(limiteDisponivelAposCompra,4999);
+    }
+
+
 }

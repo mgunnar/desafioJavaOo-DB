@@ -3,6 +3,7 @@ package com.pdi.desafio.services;
 import com.pdi.desafio.exceptions.ContaNaoEncontradaException;
 import com.pdi.desafio.models.Cliente;
 import com.pdi.desafio.models.Conta;
+import com.pdi.desafio.models.enums.TipoCliente;
 import com.pdi.desafio.repository.ContaRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,5 +69,18 @@ public class ContaService {
         Long nextNumeroConta = (maxNumeroConta != null) ? maxNumeroConta + 1 : 1;
 
         return String.format("%05d", nextNumeroConta);
+    }
+
+    public void aumentaLimiteDeCreditoSeDisponivel(Double valorCompra, Conta conta){
+        var valorMinimoGastoParaAumentarLimite = conta.getCliente().getTipoCliente().getValorGastoParaAumentoLimite();
+        var clientePodeTerAumentoDeLimite = conta.getCliente().getTipoCliente().isAumentaLimiteLiberado();
+
+        if (clientePodeTerAumentoDeLimite && valorCompra >= valorMinimoGastoParaAumentarLimite) {
+            conta.setLimite(conta.getLimite() + conta.getCliente().getTipoCliente().getValorDeAumentoLimite());
+        }
+    }
+
+    public void descontaValorCompraDoLimiteDisponivel(Conta conta, Double valor){
+        conta.setSaldo(conta.getSaldo() - valor);
     }
 }

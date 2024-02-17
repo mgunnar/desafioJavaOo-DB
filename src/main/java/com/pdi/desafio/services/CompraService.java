@@ -21,55 +21,37 @@ public class CompraService {
     @Autowired
     CompraRepository compraRepository;
 
-    public Compra efetuarCompra(String numeroConta, Double valor) throws CompraNaoAutorizadaException, ContaNaoEncontradaException {
-        var compra = new Compra();
+    public void efetuarCompra(String numeroConta, Double valor) throws CompraNaoAutorizadaException, ContaNaoEncontradaException {
 
-        compra.setNumeroConta(numeroConta);
-        compra.setValor(valor);
-        compra.setDataCriacao(Date.from(ZonedDateTime.now().toInstant()));
+        var requisicaoCompra = new Compra();
+
+        requisicaoCompra.setNumeroConta(numeroConta);
+        requisicaoCompra.setValor(valor);
+        requisicaoCompra.setDataCriacao(Date.from(ZonedDateTime.now().toInstant()));
 
         var conta = contaService.buscarContaPorNumeroConta(numeroConta);
-        var cliente = conta.getCliente();
 
         if (conta.getSaldo() < valor) {
             throw new CompraNaoAutorizadaException(valor);
         } else {
-            var compraValidadaComDesconto = verificaDescontoCompra(valor, cliente.getTipoCliente(), conta);
-            verificaAumentoDeLimite(valor, cliente.getTipoCliente(), conta);
-
-            conta.setSaldo(conta.getSaldo() - compraValidadaComDesconto);
-
+            var compraValidadaComOuSemDesconto = verificaDescontoCompra(valor, conta);
+            contaService.descontaValorCompraDoLimiteDisponivel(conta, compraValidadaComOuSemDesconto);
+            contaService.aumentaLimiteDeCreditoSeDisponivel(requisicaoCompra.getValor(),conta);
             contaService.salvarConta(conta);
-            compraRepository.save(compra);
-
-            return compra;
+            compraRepository.save(requisicaoCompra);
         }
     }
 
+//TODO: esse método está fazendo mais uma coisa, deve quebrar o aumento limite e desconto compra
+    //feito
+    private Double verificaDescontoCompra(Double valorCompra, Conta conta) {
 
-    private Double verificaDescontoCompra(Double valorCompra, TipoCliente tipoCliente, Conta conta) {
-        if (valorCompra == null || tipoCliente == null || conta == null) {
-            throw new IllegalArgumentException("valorCompra, tipoCliente e conta não podem ser nulos.");
-        }
-
-        var desconto = tipoCliente.getPercentualDesconto();
-        var valorMinimoParaDesconto = tipoCliente.getValorMinimoCompraParaTerDesconto();
+        var percentualDesconto = conta.getCliente().getTipoCliente().getPercentualDesconto();
+        var valorMinimoParaDesconto = conta.getCliente().getTipoCliente().getValorMinimoCompraParaTerDesconto();
 
         if (valorCompra >= valorMinimoParaDesconto) {
-            valorCompra -= valorCompra * (desconto);
-
-            if (tipoCliente.isAumentaLimiteLiberado() && valorCompra >= tipoCliente.getValorGastoParaAumentoLimite()) {
-                conta.setLimite(conta.getLimite() + tipoCliente.getValorDeAumentoLimite());
-            }
+            valorCompra -= valorCompra * percentualDesconto;
         }
         return valorCompra;
-    }
-
-
-
-    private void verificaAumentoDeLimite(Double valorCompra, TipoCliente tipoCliente, Conta conta){
-        if (tipoCliente.isAumentaLimiteLiberado() && valorCompra >= tipoCliente.getValorGastoParaAumentoLimite()) {
-            conta.setLimite(conta.getLimite() + tipoCliente.getValorDeAumentoLimite());
-        }
     }
 }

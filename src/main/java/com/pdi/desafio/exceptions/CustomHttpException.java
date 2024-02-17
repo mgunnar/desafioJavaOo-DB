@@ -4,8 +4,8 @@ import org.springframework.http.HttpStatus;
 
 public abstract class CustomHttpException extends Exception {
 
-    private HttpStatus httpStatus;
-    private String tipoTransacao;
+    private final HttpStatus httpStatus;
+    private final String tipoTransacao;
 
     protected CustomHttpException(HttpStatus httpStatus, String message) {
         super(formatErrorMessageHttp(httpStatus, null, message));
@@ -20,8 +20,8 @@ public abstract class CustomHttpException extends Exception {
     }
 
     private static String formatErrorMessageHttp(HttpStatus httpStatus, String tipoTransacao, String message) {
-        return tipoTransacao ? null : tipoTransacao;
-            return httpStatus + " - " + tipoTransacao + ": " + message
+        if (tipoTransacao != null) {
+            return httpStatus + " - " + tipoTransacao + ": " + message;
         } else {
             return httpStatus + " - " + message;
         }
