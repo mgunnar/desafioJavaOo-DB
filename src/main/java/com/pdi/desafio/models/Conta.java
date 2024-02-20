@@ -25,11 +25,10 @@ public class Conta {
     private Double limite;
     private Double saldo;
 
-    @Transient
     private String cpfCliente;
 
     @ManyToOne
-    @JoinColumn(name = "cpfCliente")
+    @JoinColumn(name = "cpfCliente", insertable = false, updatable = false)
     private Cliente cliente;
 
     @Column(name = "data_criacao")

@@ -9,6 +9,7 @@ import com.pdi.desafio.models.Cliente;
 import com.pdi.desafio.models.Conta;
 import com.pdi.desafio.models.DTOs.ContasResponseDTO;
 import com.pdi.desafio.repository.ClienteRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -50,14 +51,13 @@ class ClienteServiceTest {
 
         Cliente clienteResult = clienteService.cadastrarNovoCliente(clienteRequest);
 
-        assertEquals(clienteResult.getNome(),(clienteRequest.nome()));
-        assertEquals (clienteResult.getCpf(),(clienteRequest.cpf()));
-        assertEquals (clienteResult.getTipoCliente(),(clienteRequest.tipoCliente()));
+        Assertions.assertEquals(clienteResult.getNome(),clienteRequest.nome().toUpperCase());
+        Assertions.assertEquals (clienteResult.getCpf(),clienteRequest.cpf());
+        Assertions.assertEquals (clienteResult.getTipoCliente(),(clienteRequest.tipoCliente()));
 
         verify(clienteRepositoryMock, atLeastOnce()).save(any(Cliente.class));
+        verify(contaServiceMock,atLeastOnce()).criarConta(any(Cliente.class));
     }
-
-
 
     @Test
     void deveBuscarTodosOsClientes() {
@@ -67,6 +67,7 @@ class ClienteServiceTest {
 
         assertFalse(clientes.isEmpty());
         assertEquals(2, clientes.size());
+        verify(clienteRepositoryMock,atLeastOnce()).findAll();
     }
 
     @Test
@@ -97,5 +98,4 @@ class ClienteServiceTest {
         assertEquals(cliente.getCpf(), contasResponseDTO.cpfCliente());
         assertEquals(conta.getDataCriacao(), contasResponseDTO.dataCriacao());
     }
-
 }
