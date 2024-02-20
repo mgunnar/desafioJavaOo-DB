@@ -30,9 +30,10 @@ public class ClienteService {
         novoCliente.setCpf(cliente.cpf());
         novoCliente.setNome(cliente.nome().toUpperCase());
         novoCliente.setTipoCliente(cliente.tipoCliente());
+        clienteRepository.save(novoCliente);
         contaService.criarConta(novoCliente);
 
-        return clienteRepository.save(novoCliente);
+        return novoCliente;
     }
 
     public List<Cliente> buscarTodosOsClientes() {

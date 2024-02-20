@@ -8,5 +8,4 @@ public record ContasResponseDTO(
         Double limite,
         Double saldo,
         String cpfCliente,
-        Date dataCriacao) {
-}
+        Date dataCriacao) {}
