@@ -1,4 +1,4 @@
-package com.pdi.desafio.models.DTOs;
+package com.pdi.desafio.dtos;
 
 
 import java.util.Date;

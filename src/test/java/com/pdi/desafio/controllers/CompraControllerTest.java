@@ -1,19 +1,17 @@
 package com.pdi.desafio.controllers;
 
 import com.pdi.desafio.Fixture.CompraRequestDTOFixture;
+import com.pdi.desafio.dtos.CompraRequestDTO;
 import com.pdi.desafio.exceptions.CompraNaoAutorizadaException;
 import com.pdi.desafio.exceptions.ContaNaoEncontradaException;
-import com.pdi.desafio.models.DTOs.CompraRequestDTO;
 import com.pdi.desafio.services.CompraService;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,8 +24,6 @@ class CompraControllerTest {
     private static final Double VALOR_COMPRA_999 = 999D;
     private static final Double VALOR_COMPRA_20000 = 20000D;
 
-    @Autowired
-    private MockMvc mockMvc;
     @Mock
     private CompraService compraServiceMock;
     @InjectMocks

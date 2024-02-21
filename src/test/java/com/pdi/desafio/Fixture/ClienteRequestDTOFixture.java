@@ -1,6 +1,6 @@
 package com.pdi.desafio.Fixture;
 
-import com.pdi.desafio.models.DTOs.ClienteRequestDTO;
+import com.pdi.desafio.dtos.ClienteRequestDTO;
 import com.pdi.desafio.models.enums.TipoCliente;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;

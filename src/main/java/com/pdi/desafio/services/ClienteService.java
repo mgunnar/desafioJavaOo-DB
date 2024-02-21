@@ -1,12 +1,9 @@
 package com.pdi.desafio.services;
 
-import com.pdi.desafio.exceptions.CompraNaoAutorizadaException;
+import com.pdi.desafio.dtos.ClienteRequestDTO;
+import com.pdi.desafio.dtos.ContasResponseDTO;
 import com.pdi.desafio.exceptions.CpfNaoEncontradoException;
-import com.pdi.desafio.exceptions.CustomHttpException;
-import com.pdi.desafio.exceptions.RuntimeTransacaoNaoConcluida;
 import com.pdi.desafio.models.Cliente;
-import com.pdi.desafio.models.DTOs.ClienteRequestDTO;
-import com.pdi.desafio.models.DTOs.ContasResponseDTO;
 import com.pdi.desafio.repository.ClienteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +21,7 @@ public class ClienteService {
         this.clienteRepository = clienteRepository;
     }
 
-    public Cliente cadastrarNovoCliente(ClienteRequestDTO cliente) throws RuntimeTransacaoNaoConcluida {
+    public Cliente cadastrarNovoCliente(ClienteRequestDTO cliente) {
         var novoCliente = new Cliente();
 
         novoCliente.setCpf(cliente.cpf());

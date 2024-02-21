@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pdi.desafio.Fixture.ClienteFixture;
 import com.pdi.desafio.Fixture.ClienteRequestDTOFixture;
 import com.pdi.desafio.models.Cliente;
-import com.pdi.desafio.models.DTOs.ClienteRequestDTO;
+import com.pdi.desafio.dtos.ClienteRequestDTO;
 import com.pdi.desafio.services.ClienteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

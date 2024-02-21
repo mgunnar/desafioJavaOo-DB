@@ -1,4 +1,4 @@
-package com.pdi.desafio.models.DTOs;
+package com.pdi.desafio.dtos;
 
 import com.pdi.desafio.models.enums.TipoCliente;
 import io.swagger.annotations.ApiModelProperty;
