@@ -16,13 +16,15 @@ import java.util.List;
 
 
 @RestController
-@AllArgsConstructor
 @RequestMapping(path = ClienteController.BASE_URL)
 public class ClienteController {
     public static final String BASE_URL = "/v1/clientes";
 
-    @Autowired
     private final ClienteService clienteService;
+
+    public ClienteController(ClienteService clienteService) {
+        this.clienteService = clienteService;
+    }
 
 
     @PostMapping("/")
