@@ -34,7 +34,7 @@ public class ClienteController {
     }
 
     @GetMapping("/")
-        public ResponseEntity<List> buscarTodosClientes() {
+        public ResponseEntity<List<Cliente>> buscarTodosClientes() {
         var listaClientes = clienteService.buscarTodosOsClientes();
         return ResponseEntity.ok(listaClientes);
     }
