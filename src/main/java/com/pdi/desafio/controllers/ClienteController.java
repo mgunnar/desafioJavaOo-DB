@@ -26,7 +26,7 @@ public class ClienteController {
 
 
     @PostMapping("/")
-    public ResponseEntity<Cliente> cadastrarNovoCliente(@RequestBody ClienteRequestDTO cliente) throws RuntimeTransacaoNaoConcluida {
+    public ResponseEntity<Cliente> cadastrarNovoCliente(@RequestBody ClienteRequestDTO cliente) {
         var clienteSalvo = clienteService.cadastrarNovoCliente(cliente);
         return ResponseEntity.status(HttpStatus.CREATED).body(clienteSalvo);
     }
