@@ -1,10 +1,9 @@
 package com.pdi.desafio.controllers;
 
-import com.pdi.desafio.exceptions.CpfNaoEncontradoException;
-import com.pdi.desafio.exceptions.RuntimeTransacaoNaoConcluida;
-import com.pdi.desafio.models.Cliente;
 import com.pdi.desafio.dtos.ClienteRequestDTO;
 import com.pdi.desafio.dtos.ContasResponseDTO;
+import com.pdi.desafio.exceptions.CpfNaoEncontradoException;
+import com.pdi.desafio.models.Cliente;
 import com.pdi.desafio.services.ClienteService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +31,7 @@ public class ClienteController {
     }
 
     @GetMapping("/")
-        public ResponseEntity<List<Cliente>> buscarTodosClientes() {
+    public ResponseEntity<List<Cliente>> buscarTodosClientes() {
         var listaClientes = clienteService.buscarTodosOsClientes();
         return ResponseEntity.ok(listaClientes);
     }
